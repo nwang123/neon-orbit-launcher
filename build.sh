@@ -11,7 +11,7 @@ mkdir -p "$orbit_app/Contents/MacOS" "$orbit_app/Contents/Resources" "$orbit_cac
 xcrun swift -module-cache-path "$orbit_cache" scripts/GenerateIcon.swift "$orbit_app/Contents/Resources/AppIcon.icns"
 xcrun swiftc src/Launcher.swift -o "$orbit_app/Contents/MacOS/NeonOrbit" -framework Cocoa -framework WebKit -module-cache-path "$orbit_cache" -target "$orbit_arch-apple-macosx13.0"
 cp src/Info.plist "$orbit_app/Contents/Info.plist"
-cp src/animation.html LICENSE NOTICE.md "$orbit_app/Contents/Resources/"
+cp src/animation.html src/night-city.png LICENSE NOTICE.md "$orbit_app/Contents/Resources/"
 codesign --force --sign - "$orbit_app"
 codesign --verify --deep --strict "$orbit_app"
 mkdir -p "${orbit_output:h}"

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'">
 <title>NEON ORBIT / Launch Sequence</title>
 <style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}canvas{display:block;width:100%;height:100%}button{position:fixed;right:34px;bottom:27px;z-index:2;border:1px solid #ff28d477;border-radius:0;background:#1d0526cc;color:#ff9ddd;padding:9px 15px;font:10px -apple-system,sans-serif;letter-spacing:1px;cursor:pointer}button:hover{color:#fff;border-color:#00efff}button:focus-visible{outline:2px solid #00efff;outline-offset:4px}@media(prefers-reduced-motion:reduce){button{color:#fff}}</style>
 </head>
@@ -29,18 +29,72 @@ function glow(x,y,r,color){let g=c.createRadialGradient(x,y,0,x,y,r);g.addColorS
 function tracked(s,x,y,size=10,color='#8299b1',spacing=3){c.font=`500 ${size}px Menlo,monospace`;c.textBaseline='top';c.textAlign='left';c.fillStyle=color;for(let char of s){c.fillText(char,x,y);x+=c.measureText(char).width+spacing}}
 function diamond(x,y,r,color,fill=false){c.beginPath();c.moveTo(x,y-r);c.lineTo(x+r*.62,y);c.lineTo(x,y+r);c.lineTo(x-r*.62,y);c.closePath();c.strokeStyle=color;c.lineWidth=1.4;if(fill){c.fillStyle=color;c.fill()}else c.stroke()}
 function brandMark(x,y,size){c.save();c.translate(x,y);c.rotate(-.55);c.strokeStyle=CYAN;c.lineWidth=size*.035;c.beginPath();c.ellipse(0,0,size*.46,size*.20,0,.15,TAU-.45);c.stroke();c.beginPath();c.ellipse(0,0,size*.46,size*.20,Math.PI/2,.7,TAU-.1);c.stroke();c.restore();diamond(x,y,size*.20,'#e9fcff',true);dot(x+size*.34,y-size*.32,size*.042,VIOLET)}
+let cityCache;
+const cityPhoto=new Image();cityPhoto.src="night-city.png";
+function makeCity(){
+ const city=document.createElement('canvas');city.width=1920;city.height=1080;const g=city.getContext('2d');
+ const fill=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(x,y,w,h)};
+ const stroke=(x,y,x2,y2,col,width=1,blur=0)=>{g.save();g.beginPath();g.moveTo(x,y);g.lineTo(x2,y2);g.strokeStyle=col;g.lineWidth=width;g.shadowColor=col;g.shadowBlur=blur;g.stroke();g.restore()};
+ const haze=(x,y,r,col)=>{let a=g.createRadialGradient(x,y,0,x,y,r);a.addColorStop(0,col);a.addColorStop(1,'transparent');g.fillStyle=a;g.fillRect(x-r,y-r,r*2,r*2)};
+ let sky=g.createLinearGradient(0,0,0,1080);sky.addColorStop(0,'#030d19');sky.addColorStop(.3,'#102334');sky.addColorStop(.7,'#291a3a');sky.addColorStop(1,'#0a1626');fill(0,0,1920,1080,sky);
+ haze(1530,340,580,'#095a7260');haze(790,630,640,'#c4238959');haze(1210,770,700,'#fd9d163b');
+ const palette=['#21eaff','#ff36bd','#ffbd57','#5fb8ff','#f1f8b0'];
+ for(let layer=0;layer<3;layer++){
+  let count=[58,29,17][layer],step=1920/count;
+  for(let i=0;i<count;i++){
+   let rand=hash(i+layer*120+9),x=i*step-step*.2,bw=step*(.7+hash(i+21+layer)*.4),bh=[170,270,390][layer]+rand*[280,260,290][layer],base=[800,860,904][layer],top=base-bh;
+   let accent=palette[(i+layer*2)%palette.length],opacity=[.25,.65,.95][layer];g.save();g.globalAlpha=opacity;
+   let face=g.createLinearGradient(x,top,x+bw,base);face.addColorStop(0,layer===2?'#192735':'#142030');face.addColorStop(.7,'#0a1524');face.addColorStop(1,'#09101e');fill(x,top,bw,bh,face);
+   fill(x+bw*.78,top+13,bw*.23,bh-13,'#030a15aa');fill(x+6,top-8,bw*.62,8,'#1f3342');
+   stroke(x,top,x+bw,top,accent,layer===2?2.2:1.2,layer===2?13:3);
+   if(layer>0){stroke(x+bw*.78,top+18,x+bw*.78,base,accent+'a0',layer===2?2.5:1,layer===2?14:0);if(i%3===0)stroke(x+5,top,x+5,base,accent+'9a',2.2,12)}
+   let ww=layer===2?6:layer===1?4:2.2,wh=layer===2?4.5:3,gapX=ww+(layer===2?7:5),gapY=layer===2?13:10;
+   for(let col=0;col<(bw-12)/gapX;col++)for(let row=0;row<(bh-24)/gapY;row++){
+    let seed=i*907+col*41+row*17+layer*1300;if(hash(seed)<.22)continue;let lit=hash(seed+1),wx=x+7+col*gapX,wy=top+16+row*gapY;
+    fill(wx,wy,ww,wh,lit>.78?'#ffe8ad':accent+(layer===2?'cc':'96'));
+    if(layer===2&&lit>.75)fill(wx-2,wy-1,ww+4,wh+2,accent+'26');
+   }
+   if(layer===2){for(let led=0;led<3;led++){let ly=top+bh*(.24+led*.24);stroke(x+3,ly,x+bw-3,ly,accent+'a0',1.3,9)}
+    if(i%3===0){let ax=x+bw*.50;stroke(ax,top,ax,top-55,accent,1.2,5);g.fillStyle=accent;g.beginPath();g.arc(ax,top-57,3,0,TAU);g.fill()}
+    if(i%4===1){let sx=x+bw*.2,sy=top+bh*.2;fill(sx-5,sy-5,bw*.65,74,'#030810');fill(sx,sy,bw*.65-10,64,accent);g.fillStyle='#07131f';g.font='900 12px Menlo';g.textAlign='center';g.fillText(['AFTER','NEON','ECHO','NIGHT'][i%4],sx+(bw*.65-10)/2,sy+25);g.font='700 9px Menlo';g.fillText('24 / 7',sx+(bw*.65-10)/2,sy+46)}
+   }g.restore();
+  }
+ }
+ // Luminous rooftop advertisements with their own housings and bloom.
+ const ad=(x,y,w,h,color,label,vertical=false)=>{g.save();fill(x-7,y-7,w+14,h+14,'#040914');g.shadowColor=color;g.shadowBlur=24;g.strokeStyle=color;g.lineWidth=3;g.strokeRect(x,y,w,h);g.shadowBlur=13;g.fillStyle=color;g.font=`800 ${vertical?25:18}px -apple-system`;g.textAlign='center';if(vertical)Array.from(label).forEach((char,i)=>g.fillText(char,x+w/2,y+35+i*36));else g.fillText(label,x+w/2,y+h/2+7);g.restore()};
+ ad(1780,395,53,185,'#ffdb35','不夜城',true);ad(829,439,55,180,'#16f6ff','未来制造',true);ad(1014,296,194,52,'#ff4eae','AFTERHOURS');ad(1452,186,153,51,'#30eaff','N / O  24H');ad(28,704,163,54,'#ffc543','MIDNIGHT');
+ // Street mist and vertically stretched light reflections on wet ground.
+ haze(1060,805,430,'#3aefff22');haze(1690,790,370,'#ff25c321');fill(0,904,1920,176,'#061220d9');
+ for(let i=0;i<110;i++){let x=hash(i+400)*1920,col=palette[i%5],height=20+hash(i+800)*130;fill(x,908,1+hash(i)*4,height,col+'38');for(let k=0;k<6;k++)fill(x-3-k*.8,916+k*height/6,7+k*2,1.5,col+'53')}
+ for(let i=-16;i<=16;i++)stroke(1080+i*19,904,1080+i*210,1080,'#25bbd730',1);
+ for(let j=0;j<9;j++){let yy=904+Math.pow(j/9,1.8)*176;stroke(0,yy,1920,yy,'#6bbad52d',.7)}
+ return city;
+}
 function background(t){
- box(-OX/S,-OY/S,W/S,H/S,'#06020d');let g=c.createLinearGradient(0,0,0,1080);g.addColorStop(0,'#0b031a');g.addColorStop(.55,'#190724');g.addColorStop(1,'#050516');box(0,0,1920,1080,g);
- glow(1310,455,520,'#f000bd2b');glow(930,800,650,'#00dfff14');
- // A procedurally drawn neon city: no stock images or brand assets.
- for(let layer=0;layer<2;layer++)for(let i=0;i<37;i++){let x=i*56-45+layer*20,bw=35+hash(i+layer*80)*32,bh=65+hash(i+layer*110+7)*(layer?270:390),y=816-bh;c.save();c.globalAlpha=layer?.75:.32;box(x,y,bw,bh,layer?'#0a061a':'#170b2b',0,layer?'#74367460':'#48264e40');line(x,y,x+bw,y,i%3===0?'#ff2acb70':'#00eaff45',1.5);if(i%6===0){line(x+bw/2,y,x+bw/2,y-36,'#f034e480');dot(x+bw/2,y-37,2,'#ff55d4')}for(let col=0;col<4;col++)for(let row=0;row<Math.floor(bh/18);row++)if(hash(i*150+col*21+row+layer*400)>.55)box(x+6+col*(bw-12)/4,y+12+row*18,2.5,5,i%3===0?'#ff1fb747':'#28dcfc35');c.restore()}
- // Perspective grid accelerates toward the horizon.
- box(0,816,1920,264,'#050619c0');for(let i=-16;i<=16;i++)line(1080+i*19,816,1080+i*190,1080,'#14bde932',1);let speed=reduced?0:(t*.12)%1;for(let j=0;j<15;j++){let a=(j+speed)/15,y=816+Math.pow(a,2.3)*264;line(0,y,1920,y,j%3===0?'#18e9f85c':'#8b37cc40',1)}line(0,815,1920,815,'#00eaff8a',1.4);
- for(let i=0;i<24;i++){let x=hash(i+30)*1920,y=(hash(i+150)*1400+(reduced?0:t*(35+hash(i+5)*60)))%1400-180;for(let j=0;j<7;j++)text(((i*17+j*3)%16).toString(16).toUpperCase(),x,y+j*18,11,`rgba(${i%2?'255,28,202':'0,235,255'},${.035+j*.013})`,true)}
- for(let star of stars)dot(star.x,star.y*.76,star.r,`rgba(191,134,255,${.12+star.z*.4})`);
+ box(-OX/S,-OY/S,W/S,H/S,'#040b16');if(cityPhoto.complete&&cityPhoto.naturalWidth){let scale=Math.max(1920/cityPhoto.naturalWidth,1080/cityPhoto.naturalHeight),iw=cityPhoto.naturalWidth*scale,ih=cityPhoto.naturalHeight*scale;c.drawImage(cityPhoto,(1920-iw)/2,(1080-ih)/2,iw,ih);box(0,0,1920,180,'#020b14a0');box(0,980,1920,100,'#020a1540')}else{if(!cityCache)cityCache=makeCity();c.drawImage(cityCache,0,0)}
+ // Moving rain catches cyan and amber signs; the city itself stays stable.
+ for(let i=0;i<150;i++){let x=hash(i+91)*1920,y=(hash(i+330)*1250+(reduced?0:t*(170+hash(i+16)*90)))%1250-120;line(x,y,x-5,y+15,i%4===0?'#ffe19f28':'#a8eaff21',.65)}
+ glow(1240,540,340,'#0affff12');glow(590,375,320,'#ffe32b0d');
+}
+function neonBillboard(t){
+ // The headline is a physical roof-mounted light box, not a flat HUD label.
+ const x=64,y=222,w=700,h=350;
+ for(let sx of [x+56,x+w-70]){box(sx,y+h,12,94,'#111a25',0,'#486d7699');line(sx-22,y+h+85,sx+30,y+h+15,'#3a5a68',5)}
+ for(let cable=0;cable<3;cable++){c.beginPath();c.moveTo(x+w-45+cable*9,y+h-4);c.bezierCurveTo(x+w+74,y+h+60,x+w+17,y+h+125,x+w+96,y+h+143);c.strokeStyle=cable===0?'#376c70':'#101923';c.lineWidth=3;c.stroke()}
+ glow(x+w/2,y+h/2,460,'#ffcf1620');glow(x+40,y+h/2,280,'#00edff15');
+ box(x+13,y+14,w+15,h+16,'#00070dee',5,'#39616b');
+ let frame=c.createLinearGradient(x,y,x+w,y+h);frame.addColorStop(0,'#4c6770');frame.addColorStop(.2,'#131c29');frame.addColorStop(.8,'#233d4a');frame.addColorStop(1,'#637b84');box(x,y,w,h,frame,4,'#89a5a780');
+ let plate=c.createLinearGradient(x,y,x,y+h);plate.addColorStop(0,'#10181f');plate.addColorStop(.52,'#070c14');plate.addColorStop(1,'#13222a');box(x+13,y+13,w-26,h-26,plate,2);
+ c.save();c.shadowColor='#ffdf38';c.shadowBlur=23;box(x+12,y+12,w-24,4,'#fff086');box(x+12,y+h-16,w-24,4,'#ffda32');c.shadowColor=CYAN;c.shadowBlur=18;box(x+10,y+13,4,h-26,CYAN);box(x+w-14,y+13,4,h-26,CYAN);c.restore();
+ for(let px of [x+7,x+w-7])for(let py of [y+7,y+h-7]){dot(px,py,3.2,'#a2c9cf');line(px-2,py,px+2,py,'#172329',1)}
+ for(let k=0;k<21;k++)line(x+24+k*31,y+27,x+24+k*31,y+h-25,'#70a5ae0b',1);
+ tracked('N/O  //  ROOFTOP TRANSMISSION 077',x+30,y+28,9,'#acb1a2',1.7);
+ c.save();c.shadowColor='#ffd027';c.shadowBlur=26;glitchText('WAKE THE',x+31,y+61,96,t,'#ffed65');c.restore();
+ c.save();c.shadowColor=CYAN;c.shadowBlur=29;glitchText('FUTURE.',x+28,y+161,119,t+.2,'#83fbff');c.restore();
+ line(x+30,y+h-62,x+w-30,y+h-62,'#ffc73c66');text('零点之后，未来上线。',x+31,y+h-45,17,'#ffe897');text('ON AIR',x+w-34,y+h-43,10,CYAN,true,'right');dot(x+w-91,y+h-38,3,'#ffd03a');
 }
 function header(t){
- line(45,40,1875,40,'#ff35ca88',2);box(45,40,170,5,MAGENTA);brandMark(73,81,44);tracked('NEON / ORBIT',112,62,16,'#f5efff',3.8);text('CYBERNETIC LAUNCH SYSTEM',113,90,8.5,'#bd75bc',true);
+ line(45,40,1875,40,'#ffcf4488',2);box(45,40,170,5,'#ffdb36');brandMark(73,81,44);tracked('NEON / ORBIT',112,62,16,'#f5efff',3.8);text('CYBERNETIC LAUNCH SYSTEM',113,90,8.5,'#bd75bc',true);
  box(1431,65,130,28,'#ec00b91a',0,'#ff31d55c');text('NIGHT MODE',1496,74,9,MAGENTA,true,'center');text('LOCAL // 077',1848,74,12,CYAN,true,'right');
  line(45,123,1875,123,'#a847ba40');text('未来接入 / FUTURE UPLINK',62,145,12,'#d9a6e0',true);text(t<4?'01_BOOT':t<11.3?'02_SYNC':'03_ENTER',1848,145,12,LIME,true,'right');
 }
@@ -62,9 +116,7 @@ function cutPanel(x,y,width,height,title,accent=CYAN){
 }
 function dashboard(t){
  let q=t-4,p=clamp(q/7.1);c.save();c.globalAlpha=smooth(q/.55);
- box(61,214,25,4,LIME);tracked('GO BEYOND THE ORDINARY',104,209,11,LIME,2.6);
- glitchText('WAKE THE',62,250,111,t);glitchText('FUTURE.',62,359,133,t+.2,CYAN);
- text('零点之后，未来上线。',70,516,20,'#f0a5da',false);text('YOUR WORKSPACE. REWIRED.',72,554,12,'#9975a4',true);
+ neonBillboard(t);
  // A large luminous particle reactor and broken targeting rings.
  glow(1272,496,315,'#ff08ba25');core(1272,496,221,t);
  for(let i=0;i<4;i++){let a=t*(i%2?.12:-.10)+i*.9;arc(1272,496,281+i*9,a,a+.57,i%2?MAGENTA:CYAN,i%2?2.5:1)}
@@ -80,13 +132,13 @@ function dashboard(t){
  c.restore();
 }
 function ready(t){
- let a=smooth((t-11.3)/.5);c.save();c.globalAlpha=a;box(0,177,1920,786,'#090215e8');glow(960,540,540,'#e000ae24');
+ let a=smooth((t-11.3)/.5);c.save();c.globalAlpha=a;box(0,177,1920,786,'#060f1de0');glow(960,540,540,'#e000ae24');
  hazard(650,262,620,t);tracked('UPLINK COMPLETE // ENTER THE NEXT',704,299,11,LIME,1.8);brandMark(960,414,90);
  glitchText('FUTURE',960,512,146,t,'#fcf3ff','center');glitchText('IS ONLINE.',960,652,103,t+.1,CYAN,'center');
  box(791,821,338,47,'#fa0cc326',0,'#ff24cbbf');text('未来已上线  /  ENTER ↗',960,835,16,'#ffbbee',true,'center');text('RETURNING TO YOUR WORKSPACE',960,906,10,'#b07cba',true,'center');c.restore();
 }
 function postFX(t){
- for(let y=0;y<1080;y+=4)box(0,y,1920,1,'#00000027');
+ for(let y=0;y<1080;y+=4)box(0,y,1920,1,'#00000016');
  let scan=reduced?640:(t*64)%1240-80;let grad=c.createLinearGradient(0,scan,0,scan+68);grad.addColorStop(0,'transparent');grad.addColorStop(.9,'#3be6ff09');grad.addColorStop(1,'transparent');box(0,scan,1920,68,grad);
  if(!reduced&&Math.sin(t*2.3)>.96){box(0,322,1920,3,'#ff15cf32');box(60,613,156,4,'#00ffff77')}
  line(45,982,1875,982,'#fa25cc55');text('N/O — AFTERHOURS EDITION',62,1005,10,'#d28bce',true);text('SIMULATED TELEMETRY / ORIGINAL VISUALS',962,1005,9,'#85638e',true,'center');
