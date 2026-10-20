@@ -1,8 +1,8 @@
 # Neon Orbit
 
-**A cinematic point of departure for your workspace.**
+**Boot into the afterhours.**
 
-为 Mac 打造的未来科技风启动动画：青蓝与紫色光轨、立体粒子球、全息遥测面板，以及最后的光圈展开转场。
+为 Mac 打造的赛博朋克启动动画：霓虹洋红与电青色、夜城天际线、透视网格、故障字效、扫描线和立体全息核心。
 
 ![Neon Orbit preview](assets/preview.png)
 
@@ -21,9 +21,9 @@
 ## 视觉设计
 
 - 原创轨道与晶体标志、原创应用图标。
-- 带经纬网格与粒子节点的立体能量核心。
-- 青蓝 / 紫色轨道、低亮度星场、波形和拓扑连线。
-- 初始化 → 同步 → 交接三个阶段，最终以光圈展开露出真实客户端。
+- 带经纬网格与粒子节点的霓虹全息核心。
+- 电青 / 洋红轨道、霓虹夜城、透视网格与数字雨。
+- 故障字效、扫描线和工业警示条；初始化 → 同步 → 交接三段式，最后以光圈展开露出真实客户端。
 - 本地 Canvas 绘制，适配不同屏幕比例，不加载网络字体或远程素材。
 
 ![Ready screen](assets/ready.png)
@@ -64,6 +64,6 @@ open "build/Neon Orbit.app"
 
 ## English
 
-Neon Orbit is a standalone macOS animation launcher for an already installed Codex or ChatGPT client. It combines an original orbital identity, a wireframe particle core, cyan and violet trajectories, holographic telemetry and an iris handoff. The sequence lasts approximately 14 seconds; click Skip Sequence or press Escape to skip.
+Neon Orbit is a standalone macOS animation launcher for an already installed Codex or ChatGPT client. It combines an original orbital identity, a neon wireframe core, cyan and magenta trajectories, a procedural night city, perspective grid, digital rain, chromatic glitch typography and an iris handoff. The sequence lasts approximately 14 seconds; click Skip Sequence or press Escape to skip.
 
 The downloadable build is for Apple Silicon on macOS 13+. It is ad-hoc signed and not Apple-notarized. Build locally with `./build.sh` if preferred. There are no third-party dependencies, API calls, remote assets, account changes or login items. All telemetry is decorative. This is an independent, unofficial project. MIT license and upstream attribution are preserved.

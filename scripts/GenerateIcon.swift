@@ -12,7 +12,7 @@ func png(_ size: Int) -> Data {
     NSGradient(starting: color(0x14253f), ending: color(0x050912))!.draw(in: tile, angle: -50)
     color(0x406080, 0.4).setStroke(); tile.lineWidth = 2; tile.stroke()
     NSGradient(starting: color(0x66caff, 0.22), ending: color(0x66caff, 0))!.draw(in: NSBezierPath(ovalIn: NSRect(x: 150, y: 150, width: 724, height: 724)), relativeCenterPosition: .zero)
-    for (angle, tint) in [(32.0, UInt32(0x79efff)), (-58.0, UInt32(0xa49bff))] {
+    for (angle, tint) in [(32.0, UInt32(0x00efff)), (-58.0, UInt32(0xff28d4))] {
         NSGraphicsContext.saveGraphicsState()
         let transform = NSAffineTransform(); transform.translateX(by: 512, yBy: 512); transform.rotate(byDegrees: CGFloat(angle)); transform.concat()
         let ring = NSBezierPath(ovalIn: NSRect(x: -309, y: -124, width: 618, height: 248)); ring.lineWidth = 18; color(tint).setStroke(); ring.stroke()
@@ -20,7 +20,7 @@ func png(_ size: Int) -> Data {
     }
     let crystal = NSBezierPath(); crystal.move(to: NSPoint(x: 512, y: 633)); crystal.line(to: NSPoint(x: 585, y: 512)); crystal.line(to: NSPoint(x: 512, y: 391)); crystal.line(to: NSPoint(x: 439, y: 512)); crystal.close(); color(0xd7faff).setFill(); crystal.fill()
     let inner = NSBezierPath(); inner.move(to: NSPoint(x: 512, y: 577)); inner.line(to: NSPoint(x: 552, y: 512)); inner.line(to: NSPoint(x: 512, y: 447)); inner.line(to: NSPoint(x: 472, y: 512)); inner.close(); color(0x67d6f1).setFill(); inner.fill()
-    let satellite = NSBezierPath(ovalIn: NSRect(x: 707, y: 707, width: 48, height: 48)); color(0xb0a4ff).setFill(); satellite.fill(); satellite.lineWidth = 9; color(0x080d1c).setStroke(); satellite.stroke()
+    let satellite = NSBezierPath(ovalIn: NSRect(x: 707, y: 707, width: 48, height: 48)); color(0xff28d4).setFill(); satellite.fill(); satellite.lineWidth = 9; color(0x080d1c).setStroke(); satellite.stroke()
     NSGraphicsContext.restoreGraphicsState()
     return bitmap.representation(using: .png, properties: [:])!
 }
